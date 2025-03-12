@@ -1,0 +1,10 @@
+<!-- nodelet_plugins.xml -->
+<library path="lib/libseeker_nodelet">
+  <class name="seeker/SeekRosNode"
+         type="SeekRosNode"
+         base_class_type="nodelet::Nodelet">
+    <description>
+      Seeker device nodelet for ROS. Handles camera and IMU data streaming.
+    </description>
+  </class>
+</library>

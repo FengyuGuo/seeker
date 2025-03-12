@@ -1,0 +1,79 @@
+<launch>
+
+<arg name="front_left_camera_name" default="cam0" />
+<arg name="front_right_camera_name" default="cam1" />
+<arg name="back_right_camera_name" default="cam2" />
+<arg name="back_left_camera_name" default="cam3" />
+<arg name="process_every_nth_frame" default="1" />
+<arg name="config" default="seeker_omni_depth" />
+<arg name="manager" default="manager"/>
+<arg name="concat_method" default="3"/>
+<arg name="concat_width" default="640"/>
+<arg name="concat_height" default="640"/>
+<arg name="blend_weight" default="0.4"/>
+<arg name="pano_radius" default="300"/>
+<arg name="bev_ground_height" default = "-1.5"/>
+<arg name="bev_fx" default = "100"/>
+
+<arg name="undistort_node_name" default="concat_undistort_node"/>
+
+<arg name="stereo_params_camchain" default="$(find seeker)/config/$(arg config)/kalibr_cam_chain.yaml"/>
+
+<node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen">
+  <param name="num_worker_threads" value="32"/>
+</node>
+
+<node pkg="nodelet" type="nodelet" name="seeker_node" 
+      args="load seeker/SeekRosNode $(arg manager)"
+      output="screen">
+    <param name="use_image_transport" value="false" />
+    <param name="pub_disparity_img" value="true" />
+    <param name="pub_disparity" value="true" />
+    <param name="pub_imu" value="true" />
+    <param name="time_sync" value="true" />
+    <param name="imu_link" value="imu" />
+</node>
+  
+<node pkg="nodelet" type="nodelet" name="concat_node" 
+        args="load image_undistort/ImageConcatNodelet $(arg manager)"
+        output="screen">
+
+  <param name="input_camera_info_from_ros_params" value = "true"/>
+  <param name="first_camera_namespace" value="$(arg front_left_camera_name)"/>
+  <param name="second_camera_namespace" value="$(arg front_right_camera_name)"/>
+  <param name="third_camera_namespace" value="$(arg back_right_camera_name)"/>
+  <param name="fourth_camera_namespace" value="$(arg back_left_camera_name)"/>
+  <param name="process_every_nth_frame" value="$(arg process_every_nth_frame)"/>
+  <rosparam file="$(arg stereo_params_camchain)"/>
+  <remap from="raw/first/image" to="/fisheye/left/image_raw"/>
+  <remap from="raw/second/image" to="/fisheye/right/image_raw"/>
+  <remap from="raw/third/image" to="/fisheye/bright/image_raw"/>
+  <remap from="raw/fourth/image" to="/fisheye/bleft/image_raw"/>
+  <remap from="/rect/image" to="$(arg undistort_node_name)/image"/>
+
+  <param name="concat_method" value = "$(arg concat_method)" />
+  <param name="concat_width" value = "$(arg concat_width)" />
+  <param name="concat_height" value = "$(arg concat_height)" />
+
+  <param name="blend_weight" value = "$(arg blend_weight)"/>
+
+  <param name="pano_radius" value = "$(arg pano_radius)"/>
+
+  <param name="bev_ground_height" value = "$(arg bev_ground_height)"/>
+  <param name="bev_fx" value = "$(arg bev_fx)"/>
+</node>
+
+<!-- method
+0 简单拼接的圆柱投影全景(有拼接缝,算力要求低)
+1 融合拼接bev (blend_weight) 融合权重值 >0.7(有撕裂) 0.7左右(有拼接缝)0(有重影) 调整范围(从0.7调到0
+            (bev_ground_height)地面相对于模块的高度，例如(-1.0米)设置为(-1.0)
+            (bev_fx)
+2 融合拼接的圆柱投影全景
+              (blend_weight) 融合权重值 >0.7(有撕裂) 0.7左右(有拼接缝)0(有重影) 调整范围(从0.7调到0)
+              (pano_radius) 半径大小
+3 融合拼接的球极投影全景
+              (blend_weight) 融合权重值 调整范围(从0.7调到0)
+              (pano_radius) 半径大小
+-->
+
+</launch>
