@@ -198,12 +198,14 @@ def task2():
     test = 0
     asyncio.run(cmd_get_cali_cam())
 
-    binary_data = dev.read(ep2, 2048, timeout=500)
-    data = DeviceParam.from_buffer_copy(binary_data)
+    while (1):
+        binary_data = dev.read(ep2, 2048, timeout=500)
+        data = DeviceParam.from_buffer_copy(binary_data)
 
-    if (data.type == 1145241863): # calicam
-        print("get_kalibr_yaml")
-        get_kalibr_yaml(data.param.cali)
+        if (data.type == 1145241863): # calicam
+            print("get_kalibr_yaml")
+            get_kalibr_yaml(data.param.cali)
+            break
 
 if __name__ == "__main__":
     thread2 = threading.Thread(target=task2)
