@@ -1,0 +1,9 @@
+*.mod
+*.mod.c
+*.order
+*.o
+*.ko
+*.cmd
+*.symvers
+*.out
+pps_s_main

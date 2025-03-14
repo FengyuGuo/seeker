@@ -8,12 +8,12 @@
 <node pkg="nodelet" type="nodelet" name="seeker_node" 
         args="standalone seeker/SeekRosNode"
         output="screen">
-    <param name="use_image_transport" value="$(arg use_image_transport)" />
-    <param name="pub_disparity_img" value="$(arg pub_disparity_img)" />
-    <param name="pub_disparity" value="$(arg pub_disparity)" />
-    <param name="pub_imu" value="$(arg pub_imu)" />
-    <param name="time_sync" value="$(arg time_sync)" />
-    <param name="imu_link" value="imu" />
+    <param name="use_image_transport" value="$(arg use_image_transport)"/>
+    <param name="pub_disparity_img" value="$(arg pub_disparity_img)"/>
+    <param name="pub_disparity" value="$(arg pub_disparity)"/>
+    <param name="pub_imu" value="$(arg pub_imu)"/>
+    <param name="time_sync" value="$(arg time_sync)"/>
+    <param name="imu_link" value="imu"/>
 </node>
 
 </launch>

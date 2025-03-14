@@ -1,11 +1,11 @@
 <launch>
 
-<arg name="front_left_camera_name" default="cam0" />
-<arg name="front_right_camera_name" default="cam1" />
-<arg name="back_right_camera_name" default="cam2" />
-<arg name="back_left_camera_name" default="cam3" />
-<arg name="process_every_nth_frame" default="1" />
-<arg name="config" default="seeker_omni_depth" />
+<arg name="front_left_camera_name" default="cam0"/>
+<arg name="front_right_camera_name" default="cam1"/>
+<arg name="back_right_camera_name" default="cam2"/>
+<arg name="back_left_camera_name" default="cam3"/>
+<arg name="process_every_nth_frame" default="1"/>
+<arg name="config" default="seeker_omni_depth"/>
 <arg name="manager" default="manager"/>
 <arg name="concat_method" default="3"/>
 <arg name="concat_width" default="640"/>
@@ -14,28 +14,35 @@
 <arg name="pano_radius" default="300"/>
 <arg name="bev_ground_height" default = "-1.5"/>
 <arg name="bev_fx" default = "100"/>
+<arg name="standalone" default = "false"/>
+
+<arg name="standalone_args" value="standalone" if="$(arg standalone)"/>
+<arg name="standalone_args" value="load" unless="$(arg standalone)"/>
+
+<arg name="manager_args" value = "$(arg manager)" unless="$(arg standalone)"/>
+<arg name="manager_args" value = "" if="$(arg standalone)"/>
 
 <arg name="undistort_node_name" default="concat_undistort_node"/>
 
 <arg name="stereo_params_camchain" default="$(find seeker)/config/$(arg config)/kalibr_cam_chain.yaml"/>
 
-<node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen">
+<node unless="$(arg standalone)" pkg="nodelet" type="nodelet" name="$(arg manager_args)" args="manager" output="screen">
   <param name="num_worker_threads" value="32"/>
 </node>
 
 <node pkg="nodelet" type="nodelet" name="seeker_node" 
-      args="load seeker/SeekRosNode $(arg manager)"
+        args="$(arg standalone_args) seeker/SeekRosNode $(arg manager_args)"
       output="screen">
-    <param name="use_image_transport" value="false" />
-    <param name="pub_disparity_img" value="true" />
-    <param name="pub_disparity" value="true" />
-    <param name="pub_imu" value="true" />
-    <param name="time_sync" value="true" />
-    <param name="imu_link" value="imu" />
+    <param name="use_image_transport" value="false"/>
+    <param name="pub_disparity_img" value="true"/>
+    <param name="pub_disparity" value="true"/>
+    <param name="pub_imu" value="true"/>
+    <param name="time_sync" value="true"/>
+    <param name="imu_link" value="imu"/>
 </node>
   
 <node pkg="nodelet" type="nodelet" name="concat_node" 
-        args="load image_undistort/ImageConcatNodelet $(arg manager)"
+        args="$(arg standalone_args) image_undistort/ImageConcatNodelet $(arg manager_args)"
         output="screen">
 
   <param name="input_camera_info_from_ros_params" value = "true"/>
@@ -51,9 +58,9 @@
   <remap from="raw/fourth/image" to="/fisheye/bleft/image_raw"/>
   <remap from="/rect/image" to="$(arg undistort_node_name)/image"/>
 
-  <param name="concat_method" value = "$(arg concat_method)" />
-  <param name="concat_width" value = "$(arg concat_width)" />
-  <param name="concat_height" value = "$(arg concat_height)" />
+  <param name="concat_method" value = "$(arg concat_method)"/>
+  <param name="concat_width" value = "$(arg concat_width)"/>
+  <param name="concat_height" value = "$(arg concat_height)"/>
 
   <param name="blend_weight" value = "$(arg blend_weight)"/>
 

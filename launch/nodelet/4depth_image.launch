@@ -1,43 +1,49 @@
 <launch>
 
-<arg name="front_left_camera_name" default="cam0" />
-<arg name="front_right_camera_name" default="cam1" />
-<arg name="back_right_camera_name" default="cam2" />
-<arg name="back_left_camera_name" default="cam3" />
-<arg name="scale" default="0.1" />
-<arg name="process_every_nth_frame" default="1" />
-<arg name="publish_tf" default="true" />
-<arg name="respawn" default="false" />
-<arg name="config" default="seeker_omni_depth" />
-
-<arg     if="$(arg respawn)" name="bond" value="" />
-<arg unless="$(arg respawn)" name="bond" value="--no-bond" />
-
+<arg name="front_left_camera_name" default="cam0"/>
+<arg name="front_right_camera_name" default="cam1"/>
+<arg name="back_right_camera_name" default="cam2"/>
+<arg name="back_left_camera_name" default="cam3"/>
+<arg name="scale" default="0.1"/>
+<arg name="process_every_nth_frame" default="1"/>
+<arg name="publish_tf" default="true"/>
+<arg name="respawn" default="false"/>
+<arg name="config" default="seeker_omni_depth"/>
+<arg name="standalone" default = "false"/>
 <arg name="manager" default="manager"/>
-<node pkg="nodelet" type="nodelet" name="$(arg manager)" args="manager" output="screen">
-  <param name="num_worker_threads" value="32"/>
-</node>
-
-<arg name="stereo_params_camchain" default="$(find seeker)/config/$(arg config)/kalibr_cam_chain.yaml"/>
-
-<arg name="use_image_transport" default="true"/>
+<arg name="use_image_transport" default="false"/>
 <arg name="pub_disparity_img" default="true"/>
 <arg name="pub_disparity" default="true"/>
 <arg name="pub_imu" default="true"/>
 <arg name="time_sync" default="true"/>
 
-<node pkg="nodelet" type="nodelet" name="seeker_node" 
-        args="load seeker/SeekRosNode $(arg manager)"
-        output="screen">
-    <param name="use_image_transport" value="$(arg use_image_transport)" />
-    <param name="pub_disparity_img" value="$(arg pub_disparity_img)" />
-    <param name="pub_disparity" value="$(arg pub_disparity)" />
-    <param name="pub_imu" value="$(arg pub_imu)" />
-    <param name="time_sync" value="$(arg time_sync)" />
-    <param name="imu_link" value="imu" />
+<arg name="stereo_params_camchain" default="$(find seeker)/config/$(arg config)/kalibr_cam_chain.yaml"/>
+
+<arg     if="$(arg standalone)" name="standalone_args" value="standalone"/>
+<arg unless="$(arg standalone)" name="standalone_args" value="load"/>
+
+<arg unless="$(arg standalone)" name="manager_args" value = "$(arg manager)"/>
+<arg     if="$(arg standalone)" name="manager_args" value = ""/>
+
+<arg     if="$(arg respawn)" name="bond" value=""/>
+<arg unless="$(arg respawn)" name="bond" value="--no-bond"/>
+
+<node unless="$(arg standalone)" pkg="nodelet" type="nodelet" name="$(arg manager_args)" args="manager" output="screen">
+  <param name="num_worker_threads" value="32"/>
 </node>
 
-<node name="disparity_image_proc_front" pkg="nodelet" type="nodelet" args="load disparity_image_proc/depth_image $(arg manager)" output="screen">
+<node pkg="nodelet" type="nodelet" name="seeker_node" 
+        args="$(arg standalone_args) seeker/SeekRosNode $(arg manager_args)"
+        output="screen">
+    <param name="use_image_transport" value="$(arg use_image_transport)"/>
+    <param name="pub_disparity_img" value="$(arg pub_disparity_img)"/>
+    <param name="pub_disparity" value="$(arg pub_disparity)"/>
+    <param name="pub_imu" value="$(arg pub_imu)"/>
+    <param name="time_sync" value="$(arg time_sync)"/>
+    <param name="imu_link" value="imu"/>
+</node>
+
+<node name="disparity_image_proc_front" pkg="nodelet" type="nodelet" args="$(arg standalone_args) disparity_image_proc/depth_image $(arg manager_args)" output="screen">
 <remap from="/left/camera_info" to="/front/left/camera_info"/>
 <remap from="/right/camera_info" to="/front/right/camera_info"/>
 <remap from="/left/image_rect_color" to="/front/left/image_raw"/>
@@ -46,7 +52,7 @@
 <param name="approximate_sync" value="true"/>
 </node>
 
-<node name="disparity_image_proc_right" pkg="nodelet" type="nodelet" args="load disparity_image_proc/depth_image $(arg manager)" output="screen">
+<node name="disparity_image_proc_right" pkg="nodelet" type="nodelet" args="$(arg standalone_args) disparity_image_proc/depth_image $(arg manager_args)" output="screen">
 <remap from="/left/camera_info" to="/right/left/camera_info"/>
 <remap from="/right/camera_info" to="/right/right/camera_info"/>
 <remap from="/left/image_rect_color" to="/right/left/image_raw"/>
@@ -55,7 +61,7 @@
 <param name="approximate_sync" value="true"/>
 </node>
 
-<node name="disparity_image_proc_back" pkg="nodelet" type="nodelet" args="load disparity_image_proc/depth_image $(arg manager)" output="screen">
+<node name="disparity_image_proc_back" pkg="nodelet" type="nodelet" args="$(arg standalone_args) disparity_image_proc/depth_image $(arg manager_args)" output="screen">
 <remap from="/left/camera_info" to="/back/left/camera_info"/>
 <remap from="/right/camera_info" to="/back/right/camera_info"/>
 <remap from="/left/image_rect_color" to="/back/left/image_raw"/>
@@ -64,7 +70,7 @@
 <param name="approximate_sync" value="true"/>
 </node>
 
-<node name="disparity_image_proc_left" pkg="nodelet" type="nodelet" args="load disparity_image_proc/depth_image $(arg manager)" output="screen">
+<node name="disparity_image_proc_left" pkg="nodelet" type="nodelet" args="$(arg standalone_args) disparity_image_proc/depth_image $(arg manager_args)" output="screen">
 <remap from="/left/camera_info" to="/left/left/camera_info"/>
 <remap from="/right/camera_info" to="/left/right/camera_info"/>
 <remap from="/left/image_rect_color" to="/left/left/image_raw"/>
@@ -73,7 +79,7 @@
 <param name="approximate_sync" value="true"/>
 </node>
 
-<node pkg="nodelet" type="nodelet" name="front_stereo_undistort" args="load image_undistort/StereoUndistortNodelet $(arg manager) $(arg bond) respawn=$(arg respawn)" output="screen">
+<node pkg="nodelet" type="nodelet" name="front_stereo_undistort" args="$(arg standalone_args) image_undistort/StereoUndistortNodelet $(arg manager_args) $(arg bond) respawn=$(arg respawn)" output="screen">
   <param name="publish_tf" value = "$(arg publish_tf)"/>
   <param name="input_camera_info_from_ros_params" value = "true"/>
   <param name="first_camera_namespace" value="$(arg front_left_camera_name)"/>
@@ -96,7 +102,7 @@
   <remap from="raw/second/camera_info" to="/front/raw/second/camera_info"/>
 </node>
 
-<node pkg="nodelet" type="nodelet" name="right_stereo_undistort" args="load image_undistort/StereoUndistortNodelet $(arg manager) $(arg bond) respawn=$(arg respawn)" output="screen">
+<node pkg="nodelet" type="nodelet" name="right_stereo_undistort" args="$(arg standalone_args) image_undistort/StereoUndistortNodelet $(arg manager_args) $(arg bond) respawn=$(arg respawn)" output="screen">
   <param name="publish_tf" value = "$(arg publish_tf)"/>
   <param name="input_camera_info_from_ros_params" value = "true"/>
   <param name="first_camera_namespace" value="$(arg front_right_camera_name)"/>
@@ -119,7 +125,7 @@
   <remap from="raw/second/camera_info" to="/right/raw/second/camera_info"/>
 </node>
 
-<node pkg="nodelet" type="nodelet" name="left_stereo_undistort" args="load image_undistort/StereoUndistortNodelet $(arg manager) $(arg bond) respawn=$(arg respawn)" output="screen">
+<node pkg="nodelet" type="nodelet" name="left_stereo_undistort" args="$(arg standalone_args) image_undistort/StereoUndistortNodelet $(arg manager_args) $(arg bond) respawn=$(arg respawn)" output="screen">
   <param name="publish_tf" value = "$(arg publish_tf)"/>
   <param name="input_camera_info_from_ros_params" value = "true"/>
   <param name="first_camera_namespace" value="$(arg back_left_camera_name)"/>
@@ -142,7 +148,7 @@
   <remap from="raw/second/camera_info" to="/left/raw/second/camera_info"/>
 </node>
 
-<node pkg="nodelet" type="nodelet" name="back_stereo_undistort" args="load image_undistort/StereoUndistortNodelet $(arg manager) $(arg bond) respawn=$(arg respawn)" output="screen">
+<node pkg="nodelet" type="nodelet" name="back_stereo_undistort" args="$(arg standalone_args) image_undistort/StereoUndistortNodelet $(arg manager_args) $(arg bond) respawn=$(arg respawn)" output="screen">
   <param name="publish_tf" value = "$(arg publish_tf)"/>
   <param name="input_camera_info_from_ros_params" value = "true"/>
   <param name="first_camera_namespace" value="$(arg back_right_camera_name)"/>
