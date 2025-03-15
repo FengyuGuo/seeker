@@ -1,6 +1,8 @@
 ![](https://img.shields.io/badge/ROS-Noetic-brightgreen)  
 ![](https://img.shields.io/badge/LICENSE-MIT-green.svg)
 
+深圳市视元智能科技有限公司 seeker系列产品ROS SDK
+
 为Seeker系列摄像头设计的开发套件，支持ROS1 Noetic环境下的多模态数据获取与处理。
 
 ## 📦 安装指南
@@ -58,10 +60,11 @@ sudo udevadm control --reload && sudo udevadm trigger
 **然后拔插一下设备**
 
 ## 🚀 快速开始
+
 基础数据流（鱼眼图像+IMU+视差图）
 
 ```bash
-roslaunch seeker_sdk 1seeker_nodelet.launch
+roslaunch seeker 1seeker_nodelet.launch
 ```
 
 ## 其他例程运行前准备：（标定参数读取）
