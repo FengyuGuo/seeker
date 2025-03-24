@@ -22,7 +22,7 @@ cam0:
   camera_model: omni
   distortion_model: radtan
   timeshift_cam_imu: 0.0
-  rostopic: /fisheye/left/image_raw
+  rostopic: /fisheye/left/image_raw/compressed
 cam1:
   T_cam_imu:
   - [0.7093898564024407, -0.7047018790544834, 0.012700129542837113, 0.0026898071959786315]
@@ -47,7 +47,7 @@ cam1:
   camera_model: omni
   distortion_model: radtan
   timeshift_cam_imu: 0.0
-  rostopic: /fisheye/right/image_raw
+  rostopic: /fisheye/right/image_raw/compressed
 cam2:
   T_cam_imu:
   - [-0.7065011537256353, -0.7073905325075598, 0.0213249690039079, 0.0016108334118632023]
@@ -72,7 +72,7 @@ cam2:
   camera_model: omni
   distortion_model: radtan
   timeshift_cam_imu: 0.0
-  rostopic: /fisheye/bright/image_raw
+  rostopic: /fisheye/bright/image_raw/compressed
 cam3:
   T_cam_imu:
   - [-0.7029560152854226, 0.7111963808368087, -0.007249031567427899, -0.002570969624624178]
@@ -97,4 +97,4 @@ cam3:
   camera_model: omni
   distortion_model: radtan
   timeshift_cam_imu: 0.0
-  rostopic: /fisheye/bleft/image_raw
+  rostopic: /fisheye/bleft/image_raw/compressed
