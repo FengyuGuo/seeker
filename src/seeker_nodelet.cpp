@@ -8,6 +8,8 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <stereo_msgs/DisparityImage.h>
+#include <sensor_msgs/Temperature.h>
+#include <sensor_msgs/MagneticField.h>
 
 class SeekRosNodeimpl {
 public:
@@ -22,7 +24,9 @@ public:
         private_nh_.param("time_sync", time_sync_, true);
         private_nh_.param("imu_link", imu_link_, std::string("imu_link"));
         private_nh_.param("imu_topic", imu_topic_, std::string("imu_data_raw"));
-
+        // private_nh_.param("temperature_topic", temperature_topic_, std::string("/seeker/temperature"));
+        // private_nh_.param("magnetic_topic", magnetic_topic_, std::string("/seeker/magnetic"));
+        // private_nh_.param("pressure_topic", pressure_topic_, std::string("/seeker/pressure"));
         // 初始化image_transport
         if (use_image_transport_) {
             it_.reset(new image_transport::ImageTransport(nh_));
@@ -93,6 +97,9 @@ public:
         // IMU发布者
         if (pub_imu_) {
             imu_pub_ = nh_.advertise<sensor_msgs::Imu>(imu_topic_, 200);
+            // temp_pub_ = nh_.advertise<sensor_msgs::Temperature>(temperature_topic_, 200);
+            // magnetic_pub_ = nh_.advertise<sensor_msgs::MagneticField>(magnetic_topic_, 200);
+            // pressure_pub_ = nh_.advertise<sensor_msgs::Temperature>(pressure_topic_, 200);
         }
 
         // 启动设备流
@@ -174,6 +181,23 @@ private:
             imu_msg.linear_acceleration.z = event.event.sensor_custom.linear_acceleration_z;
 
             imu_pub_.publish(imu_msg);
+
+            // sensor_msgs::Temperature temp_msg;
+            // temp_msg.header = imu_msg.header;
+            // temp_msg.temperature = event.event.sensor_custom.temperature;
+            // temp_pub_.publish(temp_msg);
+
+            // sensor_msgs::Temperature press_msg;
+            // press_msg.header = imu_msg.header;
+            // press_msg.temperature = event.event.sensor_custom.pressure;
+            // pressure_pub_.publish(press_msg);
+
+            // sensor_msgs::MagneticField mag_msg;
+            // mag_msg.header = imu_msg.header;
+            // mag_msg.magnetic_field.x = event.event.sensor_custom.magnetic_field_x;
+            // mag_msg.magnetic_field.y = event.event.sensor_custom.magnetic_field_y;
+            // mag_msg.magnetic_field.z = event.event.sensor_custom.magnetic_field_z;
+            // magnetic_pub_.publish(mag_msg);
         }
     }
 
@@ -222,7 +246,8 @@ private:
     std::vector<ros::Publisher> image_pubs_ros_;
     std::vector<ros::Publisher> depth_pubs_;
     std::vector<ros::Publisher> disparity_pubs_;
-    ros::Publisher imu_pub_;
+    ros::Publisher imu_pub_,
+    // ros::Publisher temp_pub_, magnetic_pub_, pressure_pub_;
     
     // 参数
     bool use_image_transport_;
@@ -232,6 +257,9 @@ private:
     bool time_sync_;
     std::string imu_link_;
     std::string imu_topic_;
+    // std::string temperature_topic_;
+    // std::string magnetic_topic_;
+    // std::string pressure_topic_;
 };
 
 #include <nodelet/nodelet.h>

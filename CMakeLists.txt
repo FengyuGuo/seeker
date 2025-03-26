@@ -42,11 +42,14 @@ add_library(seeker_nodelet SHARED
   src/seeker_nodelet.cpp
 )
 
+# set(USB_10_LIB /usr/lib/x86_64-linux-gnu/libusb-1.0.so.0)
+
 # 链接依赖库
 target_link_libraries(seeker_nodelet
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
   seeker
+  # ${USB_10_LIB}
   usb-1.0
 )
 
